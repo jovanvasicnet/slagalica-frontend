@@ -57,16 +57,22 @@ if(!sessionId){
  localStorage.setItem("teamId",data.teamId)
  localStorage.setItem("tournamentId",tournament.id)
 
- fetch("https://slagalica-1-we7s.onrender.com/team/session",{
-  method:"POST",
-  headers:{
-   "Content-Type":"application/json"
-  },
-  body:JSON.stringify({
-   teamId:data.teamId,
-   sessionId
-  })
+fetch("https://slagalica-1-we7s.onrender.com/team/session",{
+ method:"POST",
+ headers:{
+  "Content-Type":"application/json"
+ },
+ body:JSON.stringify({
+  teamId:data.teamId,
+  sessionId
  })
+})
+.then(res=>res.json())
+.then(session=>{
+
+ localStorage.setItem("leader",session.leader)
+
+})
 
  alert("Uspješno ste se pridružili timu!")
 
