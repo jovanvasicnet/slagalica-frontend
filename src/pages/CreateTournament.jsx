@@ -31,7 +31,12 @@ function CreateTournament(){
      plannedStart:new Date().toISOString()
    })
   })
-  .then(()=>navigate("/admin/panel"))
+    .then(res=>res.text())
+    .then(data=>{
+    console.log(data)
+    navigate("/admin/panel")
+    })
+
 
  }
 
