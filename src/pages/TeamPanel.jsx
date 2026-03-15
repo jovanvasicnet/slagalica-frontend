@@ -21,7 +21,13 @@ function TeamPanel(){
 
  const [socket,setSocket] = useState(null)
 
+const isTeam1 = match && Number(teamId) === match.t1id
 
+const myWord = isTeam1 ? result?.team1Word : result?.team2Word
+const oppWord = isTeam1 ? result?.team2Word : result?.team1Word
+
+const myPoints = isTeam1 ? result?.team1Points : result?.team2Points
+const oppPoints = isTeam1 ? result?.team2Points : result?.team1Points
 
  // MATCH STATUS
  useEffect(()=>{
@@ -322,12 +328,12 @@ function TeamPanel(){
 
      <h2>Rezultat</h2>
 
-     <p>Tvoja riječ: {result.team1Word}</p>
-     <p>Protivnik: {result.team2Word}</p>
+     <p>Tvoja riječ: {myWord}</p>
+    <p>Protivnik: {oppWord}</p>
 
-     <h3>
-      Poeni: {result.team1Points} - {result.team2Points}
-     </h3>
+    <h3>
+    Poeni: {myPoints} - {oppPoints}
+    </h3>
 
      <h2>Softverska riječ:</h2>
      <h1>{result.solution}</h1>
