@@ -5,7 +5,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 import CreateTournament from "./pages/CreateTournament";
 import TournamentTeams from "./pages/TournamentTeams";
-
+import TeamPanel from "./pages/TeamPanel"
 
 function App() {
 
@@ -34,7 +34,7 @@ function App() {
 
         <Route path="/admin/tournament/:id" element={<TournamentTeams />} />
 
-
+<Route path="/team" element={<TeamPanel />} />
 
       </Routes>
     </BrowserRouter>

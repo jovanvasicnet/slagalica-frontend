@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { useNavigate } from "react-router-dom"
 function Home(){
 
  const [tournament,setTournament] = useState(null);
@@ -7,7 +7,13 @@ function Home(){
 
  const [name,setName] = useState("");
  const [password,setPassword] = useState("");
+ const navigate = useNavigate()
+let sessionId = localStorage.getItem("sessionId")
 
+if(!sessionId){
+ sessionId = crypto.randomUUID()
+ localStorage.setItem("sessionId",sessionId)
+}
  useEffect(()=>{
 
   fetch("https://slagalica-1-we7s.onrender.com/tournament/active")
@@ -46,13 +52,27 @@ function Home(){
   .then(res=>res.json())
   .then(data=>{
 
-   if(data.success){
+  if(data.success){
 
-    localStorage.setItem("teamId",data.teamId)
+ localStorage.setItem("teamId",data.teamId)
+ localStorage.setItem("tournamentId",tournament.id)
 
-    alert("Uspješno ste se pridružili timu!")
+ fetch("https://slagalica-1-we7s.onrender.com/team/session",{
+  method:"POST",
+  headers:{
+   "Content-Type":"application/json"
+  },
+  body:JSON.stringify({
+   teamId:data.teamId,
+   sessionId
+  })
+ })
 
-   }else{
+ alert("Uspješno ste se pridružili timu!")
+
+ navigate("/team")
+
+}else{
 
     alert("Pogrešno ime tima ili šifra")
 

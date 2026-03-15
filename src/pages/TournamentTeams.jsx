@@ -16,7 +16,7 @@ function TournamentTeams(){
  const token = localStorage.getItem("adminToken");
 
  const location = localStorage.getItem("tournamentLocation");
-
+const [matches,setMatches] = useState([])
  const loadTeams = () => {
 
   fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/"+id+"/teams",{
@@ -41,12 +41,20 @@ function TournamentTeams(){
 
  }
 
- useEffect(()=>{
+useEffect(()=>{
 
   loadTeams()
   loadBaseTeams()
 
- },[])
+  fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/"+id+"/matches",{
+    headers:{
+      "Authorization":"Bearer "+token
+    }
+  })
+  .then(res=>res.json())
+  .then(data=>setMatches(data))
+
+},[id])
 
  const addTeam = (e) => {
 
@@ -75,6 +83,14 @@ function TournamentTeams(){
    setImageUrl("")
 
    loadTeams()
+
+fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/"+id+"/matches",{
+ headers:{
+  "Authorization":"Bearer "+token
+ }
+})
+.then(res=>res.json())
+.then(data=>setMatches(data))
 
   })
 
@@ -140,7 +156,32 @@ function TournamentTeams(){
    </form>
 
    <hr/>
+<h2>Žrijeb</h2>
 
+{matches.map(m=>(
+ <div key={m.id} style={{border:"1px solid black",padding:"10px",marginBottom:"10px"}}>
+
+  <div>
+
+ {m.team1} VS {m.team2 ? m.team2 : "BYE"}
+
+ <button onClick={()=>{
+
+  fetch("https://slagalica-1-we7s.onrender.com/admin/match/start/"+m.id,{
+   method:"POST",
+   headers:{
+    "Authorization":"Bearer "+token
+   }
+  })
+
+ }}>
+  Start Match
+ </button>
+
+</div>
+
+ </div>
+))}
    <h2>Postojeći timovi na lokaciji</h2>
 
    {baseTeams.map(t=>(

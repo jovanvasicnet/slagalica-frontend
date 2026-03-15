@@ -67,7 +67,7 @@ function AdminPanel(){
 
       <h3>{t.name}</h3>
 
-      <p>{t.location} - {t.barName}</p>
+      <p>{t.location} - {t.bar}</p>
 
       <p>Status: {t.status}</p>
 
