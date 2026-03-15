@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 function TeamPanel(){
 
- const teamId = localStorage.getItem("teamId")
+const teamId = Number(localStorage.getItem("teamId"))
  const leader = localStorage.getItem("leader") === "true"
 
  const [match,setMatch] = useState(null)
@@ -182,6 +182,7 @@ const oppPoints = isTeam1 ? result?.team2Points : result?.team1Points
 
 
  const submitAnswer = ()=>{
+    console.log("SALJEM:", answer)
 
   fetch("https://slagalica-1-we7s.onrender.com/team/game1/answer",{
    method:"POST",
