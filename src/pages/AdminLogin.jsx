@@ -7,10 +7,13 @@ function AdminLogin() {
 
   const [username,setUsername] = useState("");
   const [password,setPassword] = useState("");
+  const [loading,setLoading] = useState(false);
 
   const login = (e) => {
 
     e.preventDefault();
+
+    setLoading(true);
 
     fetch("https://slagalica-1-xzha.onrender.com/admin/login",{
       method:"POST",
@@ -22,7 +25,15 @@ function AdminLogin() {
         password
       })
     })
-    .then(res=>res.json())
+    .then(res=>{
+
+      if(!res.ok){
+        throw new Error("Server error");
+      }
+
+      return res.json();
+
+    })
     .then(data=>{
 
       if(data.token){
@@ -36,6 +47,17 @@ function AdminLogin() {
         alert("Pogrešan username ili password");
 
       }
+
+    })
+    .catch(err=>{
+
+      console.error(err);
+      alert("Server trenutno nije dostupan");
+
+    })
+    .finally(()=>{
+
+      setLoading(false);
 
     })
 
@@ -66,8 +88,8 @@ function AdminLogin() {
 
         <br/><br/>
 
-        <button type="submit">
-          Login
+        <button disabled={loading} type="submit">
+          {loading ? "Logging..." : "Login"}
         </button>
 
       </form>
