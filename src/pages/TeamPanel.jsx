@@ -12,8 +12,12 @@ function TeamPanel(){
  const [suggestions,setSuggestions] = useState([])
 
  const [letters,setLetters] = useState([])
+ const [used,setUsed] = useState([])
+
  const [answer,setAnswer] = useState("")
  const [timer,setTimer] = useState(60)
+
+ const [result,setResult] = useState(null)
 
  const [socket,setSocket] = useState(null)
 
@@ -74,10 +78,10 @@ function TeamPanel(){
 
 
 
- // UCITAJ IGRA 1
+ // UCITAJ IGRA
  useEffect(()=>{
 
-if(countdown === 0 && match && letters.length === 0){
+  if(countdown === 0 && match && letters.length === 0){
 
    fetch("https://slagalica-1-we7s.onrender.com/team/game1/"+match.matchId)
    .then(res=>res.json())
@@ -91,7 +95,8 @@ if(countdown === 0 && match && letters.length === 0){
 
 
 
-useEffect(()=>{
+ // TIMER
+ useEffect(()=>{
 
  if(countdown === 0 && match){
 
@@ -106,7 +111,19 @@ useEffect(()=>{
 
      const remaining = 60 - Math.floor((now-start)/1000)
 
-     setTimer(remaining > 0 ? remaining : 0)
+     if(remaining <= 0){
+
+        setTimer(0)
+
+        fetch("https://slagalica-1-we7s.onrender.com/team/game1/result/"+match.matchId)
+        .then(res=>res.json())
+        .then(setResult)
+
+     }else{
+
+        setTimer(remaining)
+
+     }
 
    })
 
@@ -120,8 +137,27 @@ useEffect(()=>{
 
 
 
- const clickLetter = (l)=>{
+ const clickLetter = (l,index)=>{
+
+  if(used.includes(index)) return
+
+  setUsed(prev=>[...prev,index])
   setAnswer(prev => prev + l)
+
+ }
+
+
+
+ const removeLast = ()=>{
+
+  if(answer.length === 0) return
+
+  const newUsed = [...used]
+  newUsed.pop()
+
+  setUsed(newUsed)
+  setAnswer(prev=>prev.slice(0,-1))
+
  }
 
 
@@ -134,6 +170,7 @@ useEffect(()=>{
   socket.send(teamId + "|" + suggestion)
 
   setSuggestion("")
+
  }
 
 
@@ -176,17 +213,23 @@ useEffect(()=>{
    <h2>VS</h2>
    <h1>{match.opponent ? match.opponent : "BYE"}</h1>
 
+
+
    {countdown > 0 && (
     <h2>Početak igre za: {countdown}</h2>
    )}
+
+
 
    {countdown === 0 && (
     <h2>Vrijeme: {timer}</h2>
    )}
 
+
+
    <hr/>
 
-   {/* prijedlozi */}
+
 
    <input
     placeholder="Predloži riječ"
@@ -197,6 +240,7 @@ useEffect(()=>{
    <button onClick={sendSuggestion}>
     Predloži
    </button>
+
 
 
    {leader && (
@@ -217,7 +261,7 @@ useEffect(()=>{
 
    {/* SLOVA */}
 
-   {countdown === 0 && (
+   {countdown === 0 && !result && (
 
     <div style={{
      display:"grid",
@@ -231,7 +275,8 @@ useEffect(()=>{
 
       <button
        key={i}
-       onClick={()=>clickLetter(l)}
+       onClick={()=>clickLetter(l,i)}
+       disabled={used.includes(i)}
        style={{height:"60px",fontSize:"22px"}}
       >
 
@@ -249,13 +294,47 @@ useEffect(()=>{
 
    <h2>{answer}</h2>
 
-   <button onClick={()=>setAnswer("")}>
+
+
+   {!result && (
+
+   <>
+
+   <button onClick={removeLast}>
     Obriši
    </button>
 
    <button onClick={submitAnswer}>
     Potvrdi
    </button>
+
+   </>
+
+   )}
+
+
+
+   {/* REZULTAT */}
+
+   {result && (
+
+    <div style={{marginTop:"40px"}}>
+
+     <h2>Rezultat</h2>
+
+     <p>Tvoja riječ: {result.team1Word}</p>
+     <p>Protivnik: {result.team2Word}</p>
+
+     <h3>
+      Poeni: {result.team1Points} - {result.team2Points}
+     </h3>
+
+     <h2>Softverska riječ:</h2>
+     <h1>{result.solution}</h1>
+
+    </div>
+
+   )}
 
   </div>
 
