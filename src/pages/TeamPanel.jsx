@@ -77,7 +77,7 @@ function TeamPanel(){
  // UCITAJ IGRA 1
  useEffect(()=>{
 
-  if(countdown === 0 && match){
+if(countdown === 0 && match && letters.length === 0){
 
    fetch("https://slagalica-1-we7s.onrender.com/team/game1/"+match.matchId)
    .then(res=>res.json())
@@ -91,26 +91,32 @@ function TeamPanel(){
 
 
 
- // TIMER 60 SEKUNDI
- useEffect(()=>{
+useEffect(()=>{
 
-  if(countdown === 0){
+ if(countdown === 0 && match){
 
-   const interval = setInterval(()=>{
+  const interval = setInterval(()=>{
 
-    setTimer(t=>{
-     if(t <= 1){
-      clearInterval(interval)
-      return 0
-     }
-     return t-1
-    })
+   fetch("https://slagalica-1-we7s.onrender.com/team/game1/"+match.matchId)
+   .then(res=>res.json())
+   .then(game=>{
 
-   },1000)
+     const start = game.startTime
+     const now = Date.now()
 
-  }
+     const remaining = 60 - Math.floor((now-start)/1000)
 
- },[countdown])
+     setTimer(remaining > 0 ? remaining : 0)
+
+   })
+
+  },1000)
+
+  return ()=>clearInterval(interval)
+
+ }
+
+},[countdown])
 
 
 
