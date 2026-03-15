@@ -12,7 +12,7 @@ function App() {
   useEffect(() => {
 
     const interval = setInterval(() => {
-      fetch("https://slagalica-1-xzha.onrender.com/ping")
+      fetch("https://slagalica-1-we7s.onrender.com/ping")
         .catch(() => {});
     }, 240000); 
 

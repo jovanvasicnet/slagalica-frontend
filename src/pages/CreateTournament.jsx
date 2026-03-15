@@ -16,7 +16,7 @@ function CreateTournament(){
 
   e.preventDefault();
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/tournament/create",{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/create",{
    method:"POST",
    headers:{
      "Content-Type":"application/json",

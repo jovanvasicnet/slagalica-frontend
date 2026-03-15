@@ -15,7 +15,7 @@ function AdminLogin() {
 
     setLoading(true);
 
-    fetch("https://slagalica-1-xzha.onrender.com/admin/login",{
+    fetch("https://slagalica-1-we7s.onrender.com/admin/login",{
       method:"POST",
       headers:{
         "Content-Type":"application/json"

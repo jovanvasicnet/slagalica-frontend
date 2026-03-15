@@ -19,7 +19,7 @@ function TournamentTeams(){
 
  const loadTeams = () => {
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/tournament/"+id+"/teams",{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/"+id+"/teams",{
    headers:{
      "Authorization":"Bearer "+token
    }
@@ -31,7 +31,7 @@ function TournamentTeams(){
 
  const loadBaseTeams = () => {
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/base-teams/"+location,{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/base-teams/"+location,{
    headers:{
      "Authorization":"Bearer "+token
    }
@@ -52,7 +52,7 @@ function TournamentTeams(){
 
   e.preventDefault()
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/team/add",{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/team/add",{
    method:"POST",
    headers:{
     "Content-Type":"application/json",

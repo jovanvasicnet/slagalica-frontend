@@ -10,7 +10,7 @@ function AdminPanel(){
 
  const load = () => {
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/tournaments",{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/tournaments",{
     headers:{
       "Authorization":"Bearer "+token
     }
@@ -28,7 +28,7 @@ function AdminPanel(){
 
  const start = (id) => {
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/tournament/start/"+id,{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/start/"+id,{
    method:"POST",
    headers:{
      "Authorization":"Bearer "+token
@@ -40,7 +40,7 @@ function AdminPanel(){
 
  const finish = (id) => {
 
-  fetch("https://slagalica-1-xzha.onrender.com/admin/tournament/finish/"+id,{
+  fetch("https://slagalica-1-we7s.onrender.com/admin/tournament/finish/"+id,{
    method:"POST",
    headers:{
      "Authorization":"Bearer "+token

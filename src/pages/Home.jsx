@@ -10,7 +10,7 @@ function Home(){
 
  useEffect(()=>{
 
-  fetch("https://slagalica-1-xzha.onrender.com/tournament/active")
+  fetch("https://slagalica-1-we7s.onrender.com/tournament/active")
   .then(res=>res.json())
   .then(data=>{
 
@@ -18,7 +18,7 @@ function Home(){
 
       setTournament(data);
 
-      fetch("https://slagalica-1-xzha.onrender.com/tournament/"+data.id+"/teams")
+      fetch("https://slagalica-1-we7s.onrender.com/tournament/"+data.id+"/teams")
       .then(res=>res.json())
       .then(setTeams);
 
@@ -32,7 +32,7 @@ function Home(){
 
   e.preventDefault()
 
-  fetch("https://slagalica-1-xzha.onrender.com/team/join",{
+  fetch("https://slagalica-1-we7s.onrender.com/team/join",{
    method:"POST",
    headers:{
     "Content-Type":"application/json"
