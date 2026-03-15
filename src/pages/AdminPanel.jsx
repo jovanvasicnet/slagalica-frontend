@@ -56,7 +56,7 @@ function AdminPanel(){
 
    <h1>Admin Panel</h1>
 
-   <button onClick={()=>navigate("/admin/create")}>
+   <button onClick={()=>navigate("/admin/tournament/create")}>
      Kreiraj turnir
    </button>
 
