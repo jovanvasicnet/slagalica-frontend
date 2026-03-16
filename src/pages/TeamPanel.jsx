@@ -3,25 +3,24 @@ import { useEffect, useState } from "react"
 function TeamPanel(){
 
 const teamId = Number(localStorage.getItem("teamId"))
- const leader = localStorage.getItem("leader") === "true"
+const leader = localStorage.getItem("leader") === "true"
 
- const [match,setMatch] = useState(null)
- const [countdown,setCountdown] = useState(null)
+const [match,setMatch] = useState(null)
+const [countdown,setCountdown] = useState(null)
 
- const [suggestion,setSuggestion] = useState("")
- const [suggestions,setSuggestions] = useState([])
+const [letters,setLetters] = useState([])
+const [used,setUsed] = useState([])
+const [answer,setAnswer] = useState("")
 
- const [letters,setLetters] = useState([])
- const [used,setUsed] = useState([])
+const [timer,setTimer] = useState(60)
+const [result,setResult] = useState(null)
 
- const [answer,setAnswer] = useState("")
- const [timer,setTimer] = useState(60)
+const [suggestion,setSuggestion] = useState("")
+const [suggestions,setSuggestions] = useState([])
 
- const [result,setResult] = useState(null)
+const [socket,setSocket] = useState(null)
 
- const [socket,setSocket] = useState(null)
-
-const isTeam1 = match && Number(teamId) === match.t1id
+const isTeam1 = match && teamId === match.t1id
 
 const myWord = isTeam1 ? result?.team1Word : result?.team2Word
 const oppWord = isTeam1 ? result?.team2Word : result?.team1Word
@@ -29,323 +28,327 @@ const oppWord = isTeam1 ? result?.team2Word : result?.team1Word
 const myPoints = isTeam1 ? result?.team1Points : result?.team2Points
 const oppPoints = isTeam1 ? result?.team2Points : result?.team1Points
 
- // MATCH STATUS
- useEffect(()=>{
-
-  const interval = setInterval(()=>{
-
-   fetch("https://slagalica-1-we7s.onrender.com/team/match-status/"+teamId)
-   .then(res=>res.json())
-   .then(data=>{
-
-    setMatch(data)
-
-    if(data.startTime){
-
-     const start = new Date(data.startTime).getTime()
-     const now = new Date().getTime()
-
-     const diff = Math.floor((start-now)/1000)
-
-     if(diff > 0){
-      setCountdown(diff)
-     }else{
-      setCountdown(0)
-     }
-
-    }
-
-   })
-
-  },1000)
-
-  return ()=>clearInterval(interval)
-
- },[teamId])
 
 
+/* ================= MATCH STATUS ================= */
 
- // WEBSOCKET
- useEffect(()=>{
+useEffect(()=>{
 
-  const ws = new WebSocket(
-   "wss://slagalica-1-we7s.onrender.com/suggestions?teamId="+teamId
-  )
+ const interval = setInterval(()=>{
 
-  ws.onmessage = (event)=>{
-   setSuggestions(prev=>[...prev,event.data])
-  }
+  fetch("https://slagalica-1-we7s.onrender.com/team/match-status/"+teamId)
+  .then(res=>res.json())
+  .then(data=>{
 
-  setSocket(ws)
+   if(!data.matchId) return
 
-  return ()=>ws.close()
+   setMatch(data)
 
- },[teamId])
+   if(data.startTime){
+
+    const start = new Date(data.startTime).getTime()
+    const now = Date.now()
+
+    const diff = Math.floor((start-now)/1000)
+
+    setCountdown(diff > 0 ? diff : 0)
+
+   }
+
+  })
+
+ },1000)
+
+ return ()=>clearInterval(interval)
+
+},[teamId])
 
 
 
- // UCITAJ IGRA
- useEffect(()=>{
+/* ================= WEBSOCKET ================= */
 
-  if(countdown === 0 && match && letters.length === 0){
+useEffect(()=>{
 
-   fetch("https://slagalica-1-we7s.onrender.com/team/game1/"+match.matchId)
-   .then(res=>res.json())
-   .then(data=>{
-    setLetters(data.letters)
-   })
+ const ws = new WebSocket(
+  "wss://slagalica-1-we7s.onrender.com/suggestions?teamId="+teamId
+ )
 
-  }
+ ws.onmessage = (event)=>{
+  setSuggestions(prev=>[...prev,event.data])
+ }
 
- },[countdown,match])
+ setSocket(ws)
+
+ return ()=>ws.close()
+
+},[teamId])
 
 
 
- // TIMER
- useEffect(()=>{
+/* ================= LOAD GAME ================= */
 
- if(countdown === 0 && match){
+useEffect(()=>{
 
-  const interval = setInterval(()=>{
+ if(countdown === 0 && match && letters.length === 0){
 
-   fetch("https://slagalica-1-we7s.onrender.com/team/game1/"+match.matchId)
-   .then(res=>res.json())
-   .then(game=>{
+  fetch("https://slagalica-1-we7s.onrender.com/team/game1/"+match.matchId)
+  .then(res=>res.json())
+  .then(data=>{
 
-     const start = game.startTime
-     const now = Date.now()
+   setLetters(data.letters)
 
-     const remaining = 60 - Math.floor((now-start)/1000)
+   setTimer(60)
 
-     if(remaining <= 0){
-
-        setTimer(0)
-
-        fetch("https://slagalica-1-we7s.onrender.com/team/game1/result/"+match.matchId)
-        .then(res=>res.json())
-        .then(setResult)
-
-     }else{
-
-        setTimer(remaining)
-
-     }
-
-   })
-
-  },1000)
-
-  return ()=>clearInterval(interval)
+  })
 
  }
+
+},[countdown,match])
+
+
+
+/* ================= TIMER ================= */
+
+useEffect(()=>{
+
+ if(countdown !== 0 || !match) return
+
+ const interval = setInterval(()=>{
+
+  setTimer(prev=>{
+
+   if(prev <= 1){
+
+    clearInterval(interval)
+
+    fetch("https://slagalica-1-we7s.onrender.com/team/game1/result/"+match.matchId)
+    .then(res=>res.json())
+    .then(setResult)
+
+    return 0
+   }
+
+   return prev-1
+
+  })
+
+ },1000)
+
+ return ()=>clearInterval(interval)
 
 },[countdown])
 
 
 
- const clickLetter = (l,index)=>{
+/* ================= LETTER CLICK ================= */
 
-  if(used.includes(index)) return
+const clickLetter = (l,index)=>{
 
-  setUsed(prev=>[...prev,index])
-  setAnswer(prev => prev + l)
+ if(used.includes(index)) return
 
- }
+ setUsed(prev=>[...prev,index])
+ setAnswer(prev => prev + l)
 
-
-
- const removeLast = ()=>{
-
-  if(answer.length === 0) return
-
-  const newUsed = [...used]
-  newUsed.pop()
-
-  setUsed(newUsed)
-  setAnswer(prev=>prev.slice(0,-1))
-
- }
+}
 
 
 
- const sendSuggestion = ()=>{
+const removeLast = ()=>{
 
-  if(!suggestion) return
-  if(!socket) return
+ if(answer.length === 0) return
 
-  socket.send(teamId + "|" + suggestion)
+ const newUsed = [...used]
+ newUsed.pop()
 
-  setSuggestion("")
+ setUsed(newUsed)
+ setAnswer(prev=>prev.slice(0,-1))
 
- }
+}
 
 
 
- const submitAnswer = ()=>{
-    console.log("SALJEM:", answer)
+/* ================= SUGGESTION ================= */
 
-  fetch("https://slagalica-1-we7s.onrender.com/team/game1/answer",{
-   method:"POST",
-   headers:{
-    "Content-Type":"application/json"
-   },
-   body:JSON.stringify({
-    matchId:match.matchId,
-    teamId:teamId,
-    word:answer
-   })
+const sendSuggestion = ()=>{
+
+ if(!suggestion || !socket) return
+
+ socket.send(teamId + "|" + suggestion)
+
+ setSuggestion("")
+
+}
+
+
+
+/* ================= SUBMIT ANSWER ================= */
+
+const submitAnswer = ()=>{
+
+ fetch("https://slagalica-1-we7s.onrender.com/team/game1/answer",{
+  method:"POST",
+  headers:{
+   "Content-Type":"application/json"
+  },
+  body:JSON.stringify({
+   matchId:match.matchId,
+   teamId:teamId,
+   word:answer
   })
+ })
 
- }
-
-
-
- if(!match){
-
-  return(
-   <div style={{textAlign:"center",marginTop:"100px"}}>
-    <h1>Čeka se protivnik...</h1>
-   </div>
-  )
-
- }
+}
 
 
+
+/* ================= UI ================= */
+
+if(!match){
 
  return(
-
   <div style={{textAlign:"center",marginTop:"100px"}}>
+   <h1>Čeka se protivnik...</h1>
+  </div>
+ )
 
-   <h1>{match.team}</h1>
-   <h2>VS</h2>
-   <h1>{match.opponent ? match.opponent : "BYE"}</h1>
-
-
-
-   {countdown > 0 && (
-    <h2>Početak igre za: {countdown}</h2>
-   )}
+}
 
 
 
-   {countdown === 0 && (
-    <h2>Vrijeme: {timer}</h2>
-   )}
+return(
+
+ <div style={{textAlign:"center",marginTop:"100px"}}>
+
+  <h1>{match.team}</h1>
+  <h2>VS</h2>
+  <h1>{match.opponent ? match.opponent : "BYE"}</h1>
 
 
 
-   <hr/>
+  {countdown > 0 && (
+   <h2>Početak igre za: {countdown}</h2>
+  )}
 
 
 
-   <input
-    placeholder="Predloži riječ"
-    value={suggestion}
-    onChange={e=>setSuggestion(e.target.value)}
-   />
-
-   <button onClick={sendSuggestion}>
-    Predloži
-   </button>
+  {countdown === 0 && !result && (
+   <h2>Vrijeme: {timer}</h2>
+  )}
 
 
 
-   {leader && (
-
-    <div style={{marginTop:"20px"}}>
-
-     <h3>Prijedlozi tima</h3>
-
-     {suggestions.map((s,i)=>(
-      <div key={i}>{s}</div>
-     ))}
-
-    </div>
-
-   )}
+  <hr/>
 
 
 
-   {/* SLOVA */}
+  <input
+   placeholder="Predloži riječ"
+   value={suggestion}
+   onChange={e=>setSuggestion(e.target.value)}
+  />
 
-   {countdown === 0 && !result && (
-
-    <div style={{
-     display:"grid",
-     gridTemplateColumns:"repeat(6,60px)",
-     gap:"10px",
-     justifyContent:"center",
-     marginTop:"30px"
-    }}>
-
-     {letters.map((l,i)=>(
-
-      <button
-       key={i}
-       onClick={()=>clickLetter(l,i)}
-       disabled={used.includes(i)}
-       style={{height:"60px",fontSize:"22px"}}
-      >
-
-       {l}
-
-      </button>
-
-     ))}
-
-    </div>
-
-   )}
+  <button onClick={sendSuggestion}>
+   Predloži
+  </button>
 
 
 
-   <h2>{answer}</h2>
+  {leader && (
+
+   <div style={{marginTop:"20px"}}>
+
+    <h3>Prijedlozi tima</h3>
+
+    {suggestions.map((s,i)=>(
+     <div key={i}>{s}</div>
+    ))}
+
+   </div>
+
+  )}
 
 
 
-   {!result && (
+  {/* SLOVA */}
 
-   <>
+  {countdown === 0 && !result && (
 
-   <button onClick={removeLast}>
-    Obriši
-   </button>
+   <div style={{
+    display:"grid",
+    gridTemplateColumns:"repeat(6,60px)",
+    gap:"10px",
+    justifyContent:"center",
+    marginTop:"30px"
+   }}>
 
-   <button onClick={submitAnswer}>
-    Potvrdi
-   </button>
+    {letters.map((l,i)=>(
 
-   </>
+     <button
+      key={i}
+      onClick={()=>clickLetter(l,i)}
+      disabled={used.includes(i)}
+      style={{height:"60px",fontSize:"22px"}}
+     >
 
-   )}
+      {l}
+
+     </button>
+
+    ))}
+
+   </div>
+
+  )}
 
 
 
-   {/* REZULTAT */}
+  <h2>{answer}</h2>
 
-   {result && (
 
-    <div style={{marginTop:"40px"}}>
 
-     <h2>Rezultat</h2>
+  {!result && (
 
-     <p>Tvoja riječ: {myWord}</p>
+  <>
+
+  <button onClick={removeLast}>
+   Obriši
+  </button>
+
+  <button onClick={submitAnswer}>
+   Potvrdi
+  </button>
+
+  </>
+
+  )}
+
+
+
+  {/* REZULTAT */}
+
+  {result && (
+
+   <div style={{marginTop:"40px"}}>
+
+    <h2>Rezultat</h2>
+
+    <p>Tvoja riječ: {myWord}</p>
     <p>Protivnik: {oppWord}</p>
 
     <h3>
     Poeni: {myPoints} - {oppPoints}
     </h3>
 
-     <h2>Softverska riječ:</h2>
-     <h1>{result.solution}</h1>
+    <h2>Softverska riječ:</h2>
+    <h1>{result.solution}</h1>
 
-    </div>
+   </div>
 
-   )}
+  )}
 
-  </div>
+ </div>
 
- )
+)
 
 }
 
