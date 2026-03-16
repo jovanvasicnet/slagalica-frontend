@@ -35,9 +35,7 @@ function App() {
         <Route path="/admin/tournament/:id" element={<TournamentTeams />} />
 
 <Route path="/team/:matchId/:teamId" element={<TeamPanel />} />
-<Route path="/team" element={<div>Morate otvoriti /team/matchId/teamId</div>} />
-<Route path="/team/:matchId/:teamId" element={<TeamPanel />} />
-      </Routes>
+   </Routes>
     </BrowserRouter>
   );
 }
