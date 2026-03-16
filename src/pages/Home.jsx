@@ -74,9 +74,23 @@ fetch("https://slagalica-1-we7s.onrender.com/team/session",{
 
 })
 
- alert("Uspješno ste se pridružili timu!")
+alert("Uspješno ste se pridružili timu!")
 
- navigate("/team")
+fetch("https://slagalica-1-we7s.onrender.com/team/current-match/"+data.teamId)
+.then(res=>res.json())
+.then(match=>{
+
+ if(match.matchId){
+
+   navigate(`/team/${match.matchId}/${data.teamId}`)
+
+ }else{
+
+   alert("Meč još nije dodijeljen timu")
+
+ }
+
+})
 
 }else{
 
