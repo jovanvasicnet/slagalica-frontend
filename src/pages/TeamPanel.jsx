@@ -36,7 +36,7 @@ setWord(word.slice(0,-1))
 
 function submit(){
 
-fetch("/team/game1/answer",{
+fetch("https://slagalica-1-we7s.onrender.com/team/game1/answer",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -52,7 +52,7 @@ useEffect(()=>{
 
 const interval=setInterval(()=>{
 
-fetch(`/team/game1/state/${matchId}`)
+fetch(`https://slagalica-1-we7s.onrender.com/team/game1/state/${matchId}`)
 .then(r=>r.json())
 .then(data=>{
 
